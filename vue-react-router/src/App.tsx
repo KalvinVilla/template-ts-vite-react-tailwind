@@ -1,35 +1,59 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect } from "react";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
+
+import { useAuth } from "./hooks/useAuth.ts";
+
+import { AuthStatus } from "./type/auth.ts";
+
+import RequireAuth from "./component/main/RequireAuth.tsx";
+import Layout from "./component/main/Layout.tsx";
+
+import Login from "./page/Login.tsx";
+import Loading from "./page/Loading.tsx";
+import Index from "./page/Index.tsx";
+
+import Private from "./page/Private.tsx";
 
 function App() {
-  const [count, setCount] = useState(0)
+  
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const { authenticate, status } = useAuth();
+
+  useEffect(() => {
+    authenticate();
+  }, []);
+
+  useEffect(() => {
+    if (status === AuthStatus.Authenticated) navigate(location.state?.from);
+    if (status === AuthStatus.Unauthenticated)
+      navigate("/login", { state: { from: location.pathname } });
+
+  }, [status]);
+
+  useEffect(() => {
+    console.log(location.state)
+    if (location.state !== null) {
+      if (location.state.notification) {
+        const { message, success } = location.state.notification;
+        console.log(message, success);
+      }
+    }
+  }, [location.state]);
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Routes>
+      <Route path="loading" element={<Loading />} />
+      <Route path="login" element={<Login />} />
+      <Route path="/" element={<Layout />}>
+        <Route path="" element={<Index />} />
+        <Route element={<RequireAuth permission={"request/get"} />}>
+          <Route path="private" element={<Private />} />
+        </Route>
+      </Route>
+    </Routes>
+  );
 }
 
-export default App
+export default App;
