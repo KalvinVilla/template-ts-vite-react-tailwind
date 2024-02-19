@@ -7,16 +7,9 @@ const RequireAuth = ({ permission }: { permission: string }) => {
   const location = useLocation();
 
   return status === AuthStatus.Unknown ? (
-    <Navigate
-      to="/loading"
-      state={
-        location.pathname !== "/login"
-          ? { from: location.pathname }
-          : { from: null }
-      }
-    />
+    <Navigate to="/loading" state={{ from: location.pathname }} />
   ) : status === AuthStatus.Unauthenticated ? (
-    <Navigate to="/login" state={{ from: location.pathname }} />
+    <Navigate to="/login" />
   ) : auth?.permissions?.find((p) => p.includes(`${permission}`)) ||
     permission === undefined ? (
     <Outlet />

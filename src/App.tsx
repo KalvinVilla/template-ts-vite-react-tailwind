@@ -15,7 +15,6 @@ import Index from "./page/Index.tsx";
 import Private from "./page/Private.tsx";
 
 function App() {
-  
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -28,12 +27,16 @@ function App() {
   useEffect(() => {
     if (status === AuthStatus.Authenticated) navigate(location.state?.from);
     if (status === AuthStatus.Unauthenticated)
-      navigate("/login", { state: { from: location.pathname } });
-
+      navigate("/login", {
+        state:
+          location.pathname !== "/loading"
+            ? { from: location.pathname }
+            : { from: location.state.from },
+      });
   }, [status]);
 
   useEffect(() => {
-    console.log(location.state)
+    console.log(location.state);
     if (location.state !== null) {
       if (location.state.notification) {
         const { message, success } = location.state.notification;
