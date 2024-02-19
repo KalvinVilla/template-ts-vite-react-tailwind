@@ -1,9 +1,19 @@
-import { FormEvent } from "react";
+import { FormEvent, useEffect } from "react";
 
 import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+
+import { AuthStatus } from "../type/auth.ts";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, status } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (status === AuthStatus.Authenticated) {
+      navigate("/");
+    }
+  });
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -14,8 +24,7 @@ export default function Login() {
       data.get("password")!.toString(),
     );
 
-    if (auth == false) 
-      console.log("error");
+    if (auth == false) console.log("error");
   };
 
   return (
